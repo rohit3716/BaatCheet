@@ -8,6 +8,7 @@ const SignUp = () => {
   const [inputs, setInputs] = useState({
     fullName:'',
     username:'',
+    email: "",
     password:'',
     confirmPassword:'',
     gender:''
@@ -57,6 +58,20 @@ const SignUp = () => {
               onChange={(e)=>{setInputs({...inputs, username: e.target.value.toLowerCase()})}}
             />
           </div>
+          <div>
+               <label className="label p-2 ">
+                <span className="text-base label-text">Email</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter email"
+                  className="w-full input input-bordered h-10"
+                  value={inputs.email}
+                  onChange={(e) => {
+                    setInputs({ ...inputs, email: e.target.value });
+                  }}
+                />
+              </div>
 
           <div>
             <label className="label">
