@@ -52,6 +52,13 @@ const Login = () => {
           >
             {"Don't"} have an account?
           </Link>
+         
+         <Link
+            to="/forgot-password"
+            className="text-sm hover:underline hover:text-blue-600 ml-2 inline-block"
+          >
+            Forgot password?
+          </Link>
 
           <div>
             <button className="btn btn-block btn-sm mt-2" disabled={loading}>
