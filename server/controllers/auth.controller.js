@@ -1,8 +1,73 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import OTP from "../models/otp.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import sendEmail from "../utils/emailSender.js";
 import crypto from "crypto";
+
+export const sendSignupOTP = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+
+    const user = await User.findOne({ username });
+    if (user) {
+      return res.status(400).json({ error: "Username already exists." });
+    }
+
+    const userEmail = await User.findOne({ email });
+    if (userEmail) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Save OTP to db
+    await OTP.create({
+      email,
+      otp,
+    });
+
+    // Send Email
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Verify Your Email</h2>
+        <p>Your verification code for BaatCheet is:</p>
+        <h1 style="font-size: 32px; letter-spacing: 5px; color: #4F46E5;">${otp}</h1>
+        <p>This code will expire in 10 minutes.</p>
+      </div>
+    `;
+
+    await sendEmail(email, "BaatCheet - Verify Your Email", emailHtml);
+
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error in sendSignupOTP controller ", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    
+    if (!otpRecord) {
+        return res.status(400).json({ error: "OTP expired or invalid." });
+    }
+    if (otpRecord.otp !== otp) {
+        return res.status(400).json({ error: "Invalid OTP." });
+    }
+    
+    otpRecord.isVerified = true;
+    await otpRecord.save();
+    
+    res.status(200).json({ message: "Email verified successfully." });
+  } catch (error) {
+    console.error("Error in verifyOTP controller ", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 export const signup = async (req, res) => {
   try {
@@ -22,6 +87,15 @@ export const signup = async (req, res) => {
     if (userEmail) {
       return res.status(400).json({ error: "Email already exists." });
     }
+
+    // Check if email was verified
+    const otpRecord = await OTP.findOne({ email, isVerified: true }).sort({ createdAt: -1 });
+    if (!otpRecord) {
+        return res.status(400).json({ error: "Please verify your email first." });
+    }
+
+    // Delete OTP
+    await OTP.deleteMany({ email });
 
     //HASH  THE PASSWORD
     const salt = await bcrypt.genSalt(10);

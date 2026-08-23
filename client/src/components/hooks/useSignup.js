@@ -5,6 +5,61 @@ import { useAuthContext } from '../../context/AuthContext';
 const useSignup = () => {
     const [loading, setLoading ] = useState(false);
   const { setAuthUser } = useAuthContext();
+
+    const sendOTP = async({ fullName, username, email, password, confirmPassword, gender}) => {
+        const success = handleInputErrors({ fullName, username, email, password, confirmPassword, gender});
+        if (!success) return false;
+
+        setLoading(true);
+        try {
+            const res = await fetch("/api/auth/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email }),
+            });
+
+            const data = await res.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            toast.success("OTP sent to your email.");
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyOTP = async (email, otp) => {
+        if (!otp) {
+            toast.error("Please enter the OTP");
+            return false;
+        }
+
+        setLoading(true);
+        try {
+            const res = await fetch("/api/auth/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, otp }),
+            });
+
+            const data = await res.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            toast.success("Email verified successfully.");
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const signup = async({ fullName, username, email, password, confirmPassword, gender}) => {
         // console.log({ fullName, username, password, confirmPassword, gender});
         const success = handleInputErrors({ fullName, username,email, password, confirmPassword, gender});
@@ -40,7 +95,7 @@ const useSignup = () => {
 
 };
 
-return {loading, signup};
+return {loading, signup, sendOTP, verifyOTP};
 }
 
 export default useSignup

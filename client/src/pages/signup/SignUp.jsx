@@ -14,17 +14,38 @@ const SignUp = () => {
     gender:''
   });
 
-  const { loading, signup} = useSignup();
+  const [otpSent, setOtpSent] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [otp, setOtp] = useState("");
+
+  const { loading, signup, sendOTP, verifyOTP} = useSignup();
 
   const handleCheckboxChange = (gender) =>{
     setInputs({...inputs, gender});
   }
 
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    if (!inputs.email) return;
+    const success = await sendOTP(inputs);
+    if (success) {
+      setOtpSent(true);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    const success = await verifyOTP(inputs.email, otp);
+    if (success) {
+      setIsEmailVerified(true);
+      setOtpSent(false);
+    }
+  };
+
   const handleSubmit = async(e) =>{
     e.preventDefault();
-    console.log(inputs);
     await signup(inputs);
-  }
+  };
   return (
     <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
       <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
@@ -62,15 +83,45 @@ const SignUp = () => {
                <label className="label p-2 ">
                 <span className="text-base label-text">Email</span>
                 </label>
-                <input
-                  type="email"
-                  placeholder="Enter email"
-                  className="w-full input input-bordered h-10"
-                  value={inputs.email}
-                  onChange={(e) => {
-                    setInputs({ ...inputs, email: e.target.value });
-                  }}
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="Enter email"
+                    className="w-full input input-bordered h-10"
+                    value={inputs.email}
+                    onChange={(e) => {
+                      setInputs({ ...inputs, email: e.target.value });
+                      setIsEmailVerified(false);
+                      setOtpSent(false);
+                    }}
+                    disabled={isEmailVerified}
+                  />
+                  {!isEmailVerified && !otpSent && (
+                    <button className="btn btn-sm h-10" onClick={handleSendOTP} disabled={loading || !inputs.email}>
+                      Send OTP
+                    </button>
+                  )}
+                  {isEmailVerified && (
+                    <div className="flex items-center text-green-500 font-bold px-2">
+                      ✓ Verified
+                    </div>
+                  )}
+                </div>
+                {otpSent && !isEmailVerified && (
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter OTP"
+                      className="w-full input input-bordered h-10 tracking-[0.5em] text-center font-bold"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      maxLength={6}
+                    />
+                    <button className="btn btn-sm h-10 btn-primary" onClick={handleVerifyOTP} disabled={loading || otp.length < 6}>
+                      Verify
+                    </button>
+                  </div>
+                )}
               </div>
 
           <div>
@@ -109,7 +160,7 @@ const SignUp = () => {
           </Link>
 
           <div>
-            <button className="btn btn-block btn-sm mt-2 border border-slate-700" disabled={loading}>
+            <button className="btn btn-block btn-sm mt-4 border border-slate-700" disabled={loading || !isEmailVerified}>
              {loading ? <span className=" loading loading-spinner" ></span> : "Sign Up"}
             </button>
           </div>
