@@ -6,18 +6,22 @@ import notificationSound from '../../assets/sound/notification.mp3';
 
 const useListenMessages = () => {
  const {socket} = useSocketContext();
- const {messages, setMessages} = useConversation();
+ const {messages, setMessages, selectedConversation} = useConversation();
 
  useEffect(() => {
     socket?.on("newMessage", (newMessage) => {
         newMessage.shouldShake = true;
         const sound = new Audio(notificationSound);
         sound.play();
-        setMessages([...messages, newMessage]);
+        
+        // Only add to the message list if the message belongs to the active chat
+        if (newMessage.senderId === selectedConversation?._id) {
+            setMessages([...messages, newMessage]);
+        }
     })
 
     return () => socket?.off("newMessage");
- }, [socket, messages, setMessages])
+ }, [socket, messages, setMessages, selectedConversation])
 }
 
 export default useListenMessages;
