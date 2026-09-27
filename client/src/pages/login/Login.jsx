@@ -13,9 +13,9 @@ const Login = () => {
     await login(username, password);
   };
   return (
-    <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
-      <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
-        <h1 className="text-3xl font-semibold text-center text-gray-300">
+    <div className="flex flex-col items-center justify-center w-full max-w-96 mx-auto px-4">
+      <div className="w-full p-6 rounded-lg shadow-md bg-base-200 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-60 border border-base-300">
+        <h1 className="text-3xl font-semibold text-center text-base-content">
           Login
           <span className="text-blue-500"> BaatCheet</span>
         </h1>
@@ -23,11 +23,11 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div>
             <label className="label p-2">
-              <span className="text-base label-text">Username</span>
+              <span className="text-base label-text">Username or Email</span>
             </label>
             <input
               type="text"
-              placeholder="Enter username"
+              placeholder="Enter username or email"
               className="w-full input input-bordered h-10"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

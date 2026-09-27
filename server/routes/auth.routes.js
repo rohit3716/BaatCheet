@@ -1,10 +1,21 @@
-import express from 'express';
-import { login, logout, signup,forgotPassword, resetPassword, sendSignupOTP, verifyOTP } from '../controllers/auth.controller.js';
+import express from "express";
+import { 
+  login, 
+  logout, 
+  signup, 
+  sendSignupOTP, 
+  verifyOTP, 
+  sendProfileUpdateOTP,
+  forgotPassword, 
+  resetPassword 
+} from "../controllers/auth.controller.js";
+import { otpLimiter } from "../utils/rateLimiter.js";
 
 const router = express.Router();
 
-router.post("/send-otp", sendSignupOTP);
+router.post("/send-otp", otpLimiter, sendSignupOTP);
 router.post("/verify-otp", verifyOTP);
+router.post("/send-profile-otp", otpLimiter, sendProfileUpdateOTP);
 router.post("/signup", signup);
 
 router.post("/login", login);
