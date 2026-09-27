@@ -47,9 +47,9 @@ const SignUp = () => {
     await signup(inputs);
   };
   return (
-    <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
-      <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
-        <h1 className="text-3xl font-semibold text-center text-gray-300">
+    <div className="flex flex-col items-center justify-center w-full max-w-96 mx-auto px-4">
+      <div className="w-full p-6 rounded-lg shadow-md bg-base-200 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-60 border border-base-300">
+        <h1 className="text-3xl font-semibold text-center text-base-content">
           Sign Up <span className="text-blue-500"> BaatCheet</span>
         </h1>
 
